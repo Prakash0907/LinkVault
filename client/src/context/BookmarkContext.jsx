@@ -48,9 +48,28 @@ export const BookmarkProvider = ({ children }) => {
     return res.data;
   };
 
+  const deleteBookmark = async (id) => {
+    try {
+      await api.delete(`/bookmarks/${id}`);
+      setBookmarks((prev) => prev.filter((b) => b._id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const createCollection = async (name) => {
     const res = await api.post('/collections', { name });
     setCollections((prev) => [res.data, ...prev]);
+  };
+
+  const deleteCollection = async (id) => {
+    try {
+      await api.delete(`/collections/${id}`);
+      setCollections((prev) => prev.filter((c) => c._id !== id));
+      setBookmarks((prev) => prev.filter((b) => b.collectionId !== id));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -63,10 +82,13 @@ export const BookmarkProvider = ({ children }) => {
         searchBookmarks,
         fetchCollections,
         saveBookmark,
+        deleteBookmark,
         createCollection,
+        deleteCollection,
       }}
     >
       {children}
     </BookmarkContext.Provider>
   );
 };
+

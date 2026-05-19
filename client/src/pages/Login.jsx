@@ -2,11 +2,12 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link, Navigate } from 'react-router-dom';
 import { Bookmark } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, user } = useContext(AuthContext);
+  const { login, googleLogin, user } = useContext(AuthContext);
 
   if (user) {
     return <Navigate to="/" />;
@@ -19,6 +20,18 @@ export default function Login() {
     } catch (err) {
       alert('Invalid credentials');
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse.credential);
+    } catch (err) {
+      alert('Google authentication failed');
+    }
+  };
+
+  const handleGoogleError = () => {
+    alert('Google authentication failed');
   };
 
   return (
@@ -57,6 +70,21 @@ export default function Login() {
             Sign In
           </button>
         </form>
+
+        <div className="mt-6 flex flex-col items-center">
+          <div className="text-gray-500 text-xs uppercase tracking-wider mb-4 flex items-center w-full justify-center before:content-[''] before:flex-grow before:border-b before:border-dark-700 before:mr-3 after:content-[''] after:flex-grow after:border-b after:border-dark-700 after:ml-3">
+            Or
+          </div>
+          <div className="w-full flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="filled_black"
+              shape="rectangular"
+              text="signin_with"
+            />
+          </div>
+        </div>
         
         <p className="mt-6 text-center text-sm text-gray-400">
           Don't have an account?{' '}

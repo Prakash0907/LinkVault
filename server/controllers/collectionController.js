@@ -1,4 +1,5 @@
 const Collection = require('../models/Collection');
+const Bookmark = require('../models/Bookmark');
 
 exports.createCollection = async (req, res) => {
   try {
@@ -44,7 +45,10 @@ exports.deleteCollection = async (req, res) => {
     if (!collection) return res.status(404).json({ msg: 'Collection not found' });
     if (collection.userId.toString() !== req.user.id) return res.status(401).json({ msg: 'Not authorized' });
 
-    await Collection.findByIdAndRemove(req.params.id);
+    // Cascade delete all bookmarks in this collection
+    await Bookmark.deleteMany({ collectionId: req.params.id });
+
+    await Collection.findByIdAndDelete(req.params.id);
     res.json({ msg: 'Collection removed' });
   } catch (err) {
     console.error(err.message);

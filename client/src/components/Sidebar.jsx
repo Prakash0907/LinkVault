@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { BookmarkContext } from '../context/BookmarkContext';
-import { Folder, Plus, LayoutGrid } from 'lucide-react';
+import { Folder, Plus, LayoutGrid, Trash2 } from 'lucide-react';
 
 export default function Sidebar({ activeCollection, setActiveCollection }) {
-  const { collections, createCollection } = useContext(BookmarkContext);
+  const { collections, createCollection, deleteCollection } = useContext(BookmarkContext);
   const [newCollectionName, setNewCollectionName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
@@ -13,6 +13,16 @@ export default function Sidebar({ activeCollection, setActiveCollection }) {
       createCollection(newCollectionName);
       setNewCollectionName('');
       setIsCreating(false);
+    }
+  };
+
+  const handleDeleteCollection = async (e, id) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this collection? All bookmarks inside will be permanently deleted.')) {
+      if (activeCollection === id) {
+        setActiveCollection(null);
+      }
+      await deleteCollection(id);
     }
   };
 
@@ -59,7 +69,7 @@ export default function Sidebar({ activeCollection, setActiveCollection }) {
 
         <ul className="space-y-1">
           {collections.map((c) => (
-            <li key={c._id}>
+            <li key={c._id} className="group relative">
               <button
                 onClick={() => setActiveCollection(c._id)}
                 className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors duration-200 ${
@@ -67,7 +77,14 @@ export default function Sidebar({ activeCollection, setActiveCollection }) {
                 }`}
               >
                 <Folder size={18} />
-                <span className="truncate">{c.name}</span>
+                <span className="truncate pr-6">{c.name}</span>
+              </button>
+              <button
+                onClick={(e) => handleDeleteCollection(e, c._id)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1 rounded hover:bg-dark-700"
+                title="Delete Collection"
+              >
+                <Trash2 size={14} />
               </button>
             </li>
           ))}
